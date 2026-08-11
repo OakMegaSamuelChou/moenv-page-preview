@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>&#8203;</title>
+
+    <script src="https://scrm.oakmega.site/0/js/vue3.prod.js"></script>
+    <script src="https://scrm.oakmega.site/0/js/axios.min.js"></script>
+
+    <style>
+      :root {
+        --color-primary: #2f7d4a;
+        --color-background: #f5f7f6;
+        --color-surface: #ffffff;
+        --color-text: #1f2923;
+        --color-text-muted: #68736c;
+        --color-danger: #c83e3e;
+        --radius-card: 12px;
+        --page-padding: 16px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background: transparent;
+        color: var(--color-text);
+        font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
+          "PingFang TC", "Microsoft JhengHei", sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      [v-cloak] {
+        display: none;
+      }
+
+      #app,
+      .app-shell {
+        min-height: 100dvh;
+      }
+
+      .app-shell {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        padding: var(--page-padding);
+        padding-bottom: calc(var(--page-padding) + env(safe-area-inset-bottom));
+        background: linear-gradient(
+          139.66deg,
+          #b0d0a8 -26.05%,
+          #f3fff0 26.81%,
+          #def8d7 75.68%,
+          #b0d0a8 119.19%
+        );
+      }
+
+      .page-content {
+        width: 100%;
+        flex: 1;
+      }
+
+      .page-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        color: var(--color-text);
+      }
+
+      .section-title {
+        margin: 16px 0 0;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        color: var(--color-text);
+      }
+
+      .member-status {
+        margin-top: 8px;
+      }
+
+      .unbound-member {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .unbound-member p {
+        margin: 0;
+        padding: 8px 16px;
+        font-size: 18px;
+        font-weight: 400;
+        color: #727272;
+        background: #ffffff;
+        border-radius: 999px;
+      }
+
+      .bound-member {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .bound-member p {
+        margin: 0;
+        padding: 16px;
+        font-size: 18px;
+        font-weight: 400;
+        color: #727272;
+        background: #ffffff;
+        border-radius: 16px;
+      }
+
+      .bind-button {
+        position: relative;
+        display: block;
+        width: 190px;
+        margin-top: 24px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 4px 8px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #ffffff;
+        text-align: center;
+        background: #a5c956;
+        cursor: pointer;
+      }
+
+      .bind-button:hover {
+        background: #7c9e30;
+      }
+
+      .bind-button--secondary {
+        margin-top: 16px;
+        background: #9cc4a6;
+      }
+
+      .bind-button--secondary:hover {
+        background: #649c72;
+      }
+
+      .more-member-functions {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        gap: 16px;
+        margin-top: 16px;
+        justify-content: center;
+      }
+
+      .more-member-functions__button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #ffffff;
+        text-align: center;
+        background: #9cc4a6;
+        cursor: pointer;
+      }
+
+      .more-member-functions__button:hover {
+        background: #649c72;
+      }
+
+      .more-member-functions__button--primary {
+        background: #a5c956;
+      }
+
+      .more-member-functions__button--primary:hover {
+        background: #7c9e30;
+      }
+
+      .more-member-functions__icon {
+        position: relative;
+        display: block;
+        width: 34px;
+        height: 34px;
+      }
+
+      .more-member-functions__icon img {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+
+      .more-member-functions__icon-hover {
+        opacity: 0;
+      }
+
+      .more-member-functions__button:hover
+        .more-member-functions__icon:not(.more-member-functions__icon--badge)
+        img:not(.more-member-functions__icon-hover) {
+        opacity: 0;
+      }
+
+      .more-member-functions__button:hover .more-member-functions__icon-hover {
+        opacity: 1;
+      }
+
+      .more-member-functions__icon--badge {
+        width: fit-content;
+        height: fit-content;
+        overflow: visible;
+      }
+
+      .more-member-functions__icon--badge > img:first-of-type {
+        position: relative;
+        inset: auto;
+        margin: 0;
+        display: block;
+      }
+
+      .more-member-functions__icon--badge .more-member-functions__icon-hover {
+        inset: auto;
+        top: 0;
+        left: 100%;
+        margin: 0;
+        max-width: none;
+        max-height: none;
+        transform: translateX(-50%);
+        z-index: 1;
+      }
+
+      .bind-button__arrow-wrap {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        pointer-events: none;
+      }
+
+      .bind-button__arrow {
+        position: absolute;
+        inset: 0;
+        width: 16px;
+        height: 16px;
+        object-fit: fill;
+      }
+
+      .bind-button__arrow--hover {
+        opacity: 0;
+      }
+
+      .bind-button:hover .bind-button__arrow:not(.bind-button__arrow--hover) {
+        opacity: 0;
+      }
+
+      .bind-button:hover .bind-button__arrow--hover {
+        opacity: 1;
+      }
+
+      .action-area {
+        position: sticky;
+        bottom: 0;
+        padding: 12px 0;
+        background: var(--color-surface);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app" v-cloak>
+      <main class="app-shell">
+        <section class="page-content">
+          <!-- 在這裡加入主要畫面內容 -->
+          <h1 class="page-title">歡迎使用環保集點</h1>
+          <!-- 未綁定 -->
+          <div v-if="!isBound" class="member-status">
+              <div class="unbound-member">
+                <img width="54" height="47" src="https://scrm.oakmega.site/752/2608/07/imagemap/YWMiYmRK/1040" alt="綠寶" />
+                <p>您尚未綁定／註冊環保集點會員</p>
+              </div>
+              <button class="bind-button" type="button">
+                <span>立即綁定／註冊</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>認識環保集點</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>綠點怎麼使用</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>掌握最新消息</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>常見問題</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+            </div>
+            <!-- 已綁定 -->
+            <div v-else class="member-status">
+              <div class="bound-member">
+                <img width="78" height="68" src="https://scrm.oakmega.site/752/2608/07/imagemap/P0wgcm7d/1040" alt="綠寶" />
+                <p>
+                  <span>帳號：0912345678</span>
+                  <br />
+                  <span>點數：123,456 點</span>
+                </p>
+              </div>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>前往票券兌換</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>掌握最新消息</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <button class="bind-button bind-button--secondary" type="button">
+                <span>常見問題</span>
+                <span class="bind-button__arrow-wrap" aria-hidden="true">
+                  <img
+                    class="bind-button__arrow"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/16KkQ80R/1040"
+                    alt=""
+                  />
+                  <img
+                    class="bind-button__arrow bind-button__arrow--hover"
+                    src="https://scrm.oakmega.site/752/2608/07/imagemap/iGRtZxBc/1040"
+                    alt=""
+                  />
+                </span>
+              </button>
+              <p class="section-title">更多會員功能</p>
+              <div class="more-member-functions">
+                <button class="more-member-functions__button" type="button">
+                  <span>新增載具</span>
+                  <span class="more-member-functions__icon" aria-hidden="true">
+                    <img width="34" height="34" src="https://scrm.oakmega.site/752/2608/07/imagemap/fOMO3ZQp/1040" alt="" />
+                    <img
+                      class="more-member-functions__icon-hover"
+                      src="https://scrm.oakmega.site/752/2608/07/imagemap/uOR87bjq/1040"
+                      width="34"
+                      height="34"
+                      alt=""
+                    />
+                  </span>
+                </button>
+                <button class="more-member-functions__button" type="button">
+                  <span>點數查詢</span>
+                  <span
+                    class="more-member-functions__icon more-member-functions__icon--badge"
+                    aria-hidden="true"
+                  >
+                    <img width="33" height="33" src="https://scrm.oakmega.site/752/2608/07/imagemap/Mchq3Vuk/1040" alt="" />
+                    <img
+                      class="more-member-functions__icon-hover"
+                      src="https://scrm.oakmega.site/752/2608/07/imagemap/LYuuNKz4/1040"
+                      width="22"
+                      height="23"
+                      alt=""
+                    />
+                  </span>
+                </button>
+                <button
+                  class="more-member-functions__button more-member-functions__button--primary"
+                  type="button"
+                >
+                  <span>每日簽到</span>
+                  <span class="more-member-functions__icon" aria-hidden="true">
+                    <img width="29" height="29" src="https://scrm.oakmega.site/752/2608/07/imagemap/L9rdq3w9/1040" alt="" />
+                    <img
+                      class="more-member-functions__icon-hover"
+                      src="https://scrm.oakmega.site/752/2608/07/imagemap/JP7mkeUx/1040"
+                      width="21"
+                      height="22"
+                      alt=""
+                    />
+                  </span>
+                </button>
+              </div>
+            </div>
+        </section>
+
+        <!-- 如需固定在 compact 視窗底部的操作區，可啟用這個區塊。 -->
+        <!-- <footer class="action-area"></footer> -->
+      </main>
+    </div>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const api = axios.create({
+          baseURL: "https://enterprise.oakmega.ai",
+          timeout: 10000,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const { createApp, ref } = Vue;
+
+        createApp({
+          setup() {
+            // TODO: 之後改由 API 回傳結果設定；目前先用 boolean 測試切換
+            const isBound = ref(false);
+
+            return {
+              isBound,
+            };
+          },
+        }).mount("#app");
+      });
+    </script>
+  </body>
+</html>

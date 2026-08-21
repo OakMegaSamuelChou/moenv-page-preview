@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LIFF 觸發測試</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      color: #111;
+    }
+
+    p {
+      margin: 0 0 28px;
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    #confirm-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+      background: #06C755;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #confirm-btn:hover {
+      background: #05a847;
+    }
+
+    #confirm-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 16px;
+      font-size: 0.82rem;
+      color: #888;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>說明頁標題</h2>
+    <p>這裡放你的 LIFF 說明內容。<br>使用者閱讀後點擊下方按鈕，即可觸發機器人回覆。</p>
+
+    <button id="confirm-btn" onclick="onConfirm()">確認，開始查詢</button>
+    <div id="status">初始化中...</div>
+  </div>
+
+  <script>
+    const LIFF_ID = 'YOUR_LIFF_ID'; // ← 替換成你的 LIFF ID
+    const TRIGGER_TEXT = '__confirm__'; // ← 替換成你的觸發關鍵字
+
+    const btn = document.getElementById('confirm-btn');
+    const status = document.getElementById('status');
+
+    async function init() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isInClient()) {
+          status.textContent = '⚠️ 請在 LINE 內開啟此頁面';
+          btn.disabled = true;
+          return;
+        }
+        status.textContent = '準備完成';
+      } catch (err) {
+        status.textContent = '初始化失敗：' + err.message;
+        btn.disabled = true;
+      }
+    }
+
+    async function onConfirm() {
+      btn.disabled = true;
+      status.textContent = '送出中...';
+      try {
+        await liff.sendMessages([{
+          type: 'text',
+          text: TRIGGER_TEXT
+        }]);
+        status.textContent = '✅ 已送出，關閉中...';
+        liff.closeWindow();
+      } catch (err) {
+        status.textContent = '❌ 送出失敗：' + err.message;
+        btn.disabled = false;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
